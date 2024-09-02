@@ -15,20 +15,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        TYPE: [agent, manager]
-        ARCHITECTURE : [x86_64, i386]
+        TYPE: [agent]
+        ARCHITECTURE : [x86_64]
         exclude:
           - TYPE: manager
             ARCHITECTURE: i386
       fail-fast: false
 
     steps:
-      - name: Cancel previous runs
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          cancel_others: 'true'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          skip_after_successful_duplicate: 'false'
+      # - name: Cancel previous runs
+      #  uses: fkirc/skip-duplicate-actions@master
+      #  with:
+      #    cancel_others: 'true'
+      #    github_token: ${{ secrets.GITHUB_TOKEN }}
+      #    skip_after_successful_duplicate: 'false'
 
       - uses: actions/checkout@v3
 
@@ -76,7 +76,7 @@ jobs:
               W_BRANCH=${{ env.VERSION }}
           fi
           REVISION=$( echo ${{ github.head_ref }} | sed 's/-/./g; s/\//./g' )
-          bash generate_rpm_package.sh -b ${W_BRANCH} -t ${{ matrix.TYPE }} -a ${{ matrix.ARCHITECTURE }} --dev -j 2 --dont-build-docker --tag ${{ env.TAG }} -r $REVISION
+          bash generate_rpm_package.sh -b ${W_BRANCH} -t ${{ matrix.TYPE }} -a ${{ matrix.ARCHITECTURE }} --dev -j 2 --dont-build-docker --tag ${{ env.TAG }} -r $REVISION -p /var/opt/ossec
           echo "PACKAGE_NAME=$(ls ./output | grep .rpm | head -n 1)" >> $GITHUB_ENV
 
       - name: Upload Wazuh ${{ matrix.TYPE }} ${{ matrix.ARCHITECTURE }} package as artifact
