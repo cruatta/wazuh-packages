@@ -77,7 +77,7 @@ jobs:
               W_BRANCH=${{ env.VERSION }}
           fi
           REVISION=$( echo ${{ github.head_ref }} | sed 's/-/./g; s/\//./g' )
-          bash generate_rpm_package.sh -b ${W_BRANCH} -t ${{ matrix.TYPE }} -a ${{ matrix.ARCHITECTURE }} -j 2 --tag ${{ env.TAG }} -r $REVISION -p /var/opt/ossec
+          bash generate_rpm_package.sh -b v4.8.2 --packages-branch v4.8.2 -t agent -a x86_64 -j 2 --tag agent -p /var/opt/ossec
           echo "PACKAGE_NAME=$(ls ./output | grep .rpm | head -n 1)" >> $GITHUB_ENV
 
       - name: Upload Wazuh ${{ matrix.TYPE }} ${{ matrix.ARCHITECTURE }} package as artifact
