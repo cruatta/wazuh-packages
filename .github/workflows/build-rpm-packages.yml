@@ -67,11 +67,6 @@ jobs:
           if [ $MAJOR == "5.0" ]; then echo "VERSION=master" >> $GITHUB_ENV ; else echo "VERSION=$(cat $GITHUB_WORKSPACE/VERSION)" >> $GITHUB_ENV; fi
           if [ "${{ matrix.ARCHITECTURE }}" == "x86_64" ]; then echo "CONTAINER_NAME=rpm_${{ matrix.TYPE }}_builder_x86" >> $GITHUB_ENV ; else echo "CONTAINER_NAME=rpm_${{ matrix.TYPE }}_builder_${{ matrix.ARCHITECTURE }}" >> $GITHUB_ENV ; fi
 
-      - name: Download docker image for package building
-        if : steps.changes.outputs.rpm_packages == 'true' || (steps.changes.outputs.rpm_images_agent_i386 == 'true' && matrix.ARCHITECTURE == 'i386') || ((steps.changes.outputs.rpm_images_manager_x86_64 == 'true' || steps.changes.outputs.rpm_images_agent_x86_64 == 'true') && matrix.ARCHITECTURE == 'x86_64')
-        run: |
-          bash $GITHUB_WORKSPACE/.github/actions/ghcr-pull-and-push/pull_image_from_ghcr.sh ${{ secrets.GITHUB_TOKEN }} ${{ github.actor}} $CONTAINER_NAME ${{ env.TAG }}
-
       - name: Build the ${{ matrix.ARCHITECTURE }} rpm Wazuh ${{ matrix.TYPE }} package
         if : steps.changes.outputs.rpm_packages == 'true' || (steps.changes.outputs.rpm_images_agent_i386 == 'true' && matrix.ARCHITECTURE == 'i386') || ((steps.changes.outputs.rpm_images_manager_x86_64 == 'true' || steps.changes.outputs.rpm_images_agent_x86_64 == 'true') && matrix.ARCHITECTURE == 'x86_64')
         working-directory: ./rpms
@@ -82,7 +77,7 @@ jobs:
               W_BRANCH=${{ env.VERSION }}
           fi
           REVISION=$( echo ${{ github.head_ref }} | sed 's/-/./g; s/\//./g' )
-          bash generate_rpm_package.sh -b ${W_BRANCH} -t ${{ matrix.TYPE }} -a ${{ matrix.ARCHITECTURE }} --dev -j 2 --dont-build-docker --tag ${{ env.TAG }} -r $REVISION -p /var/opt/ossec
+          bash generate_rpm_package.sh -b ${W_BRANCH} -t ${{ matrix.TYPE }} -a ${{ matrix.ARCHITECTURE }} -j 2 --tag ${{ env.TAG }} -r $REVISION -p /var/opt/ossec
           echo "PACKAGE_NAME=$(ls ./output | grep .rpm | head -n 1)" >> $GITHUB_ENV
 
       - name: Upload Wazuh ${{ matrix.TYPE }} ${{ matrix.ARCHITECTURE }} package as artifact
